@@ -14,7 +14,8 @@ function NewsCard({ news }) {
               </span>
             ))}
           </div>
-          <span>{news.date}</span>
+
+          <span className="news-date">{news.date}</span>
         </div>
 
         <h2>{news.title}</h2>

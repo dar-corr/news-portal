@@ -1,9 +1,17 @@
 import { Link, useParams } from "react-router";
 
-function NewsDetailsPage({ news }) {
+function NewsDetailsPage({ news, loading }) {
   const { id } = useParams();
 
   const currentNews = news.find((item) => item.id === Number(id));
+
+  if (loading && !currentNews) {
+    return (
+      <main className="container section">
+        <p>Загрузка...</p>
+      </main>
+    );
+  }
 
   if (!currentNews) {
     return (
@@ -27,9 +35,17 @@ function NewsDetailsPage({ news }) {
         />
 
         <div className="news-meta">
-          <span className="category">{currentNews.category}</span>
+          <div className="categories">
+            {currentNews.categories?.map((category) => (
+              <span className="category" key={category}>
+                {category}
+              </span>
+            ))}
+          </div>
 
-          <span>{currentNews.date}</span>
+          <span className="news-date">
+            {currentNews.date ?? "Дата не указана"}
+          </span>
         </div>
 
         <h1>{currentNews.title}</h1>
