@@ -111,21 +111,36 @@ textarea {
   color: white;
   cursor: pointer;
   transition: 0.2s;
+  margin-right: 10px;
 }
 
-.button:hover {
-  background: #1d4ed8;
-}
+  .button:hover {
+    background: #1d4ed8;
+  }
 
 .secondary-button {
   background: #4b5563;
 }
 
-.secondary-button:hover {
-  background: #374151;
+  .secondary-button:hover {
+    background: #374151;
+  }
+
+.danger-button {
+  background: #dc2626;
 }
 
+  .danger-button:hover {
+    background: #b91c1c;
+  }
+
 /* NEWS */
+
+.news-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 
 .news-grid {
   display: grid;

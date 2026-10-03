@@ -1,9 +1,20 @@
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
-function NewsDetailsPage({ news, loading }) {
+function NewsDetailsPage({ news, loading, onDeleteNews }) {
   const { id } = useParams();
-
+  const navigate = useNavigate();
   const currentNews = news.find((item) => item.id === Number(id));
+
+  function handleDelete() {
+    const confirmed = window.confirm("Удалить эту новость?");
+
+    if (!confirmed) {
+      return;
+    }
+
+    onDeleteNews(currentNews.id);
+    navigate("/news");
+  }
 
   if (loading && !currentNews) {
     return (
@@ -55,6 +66,10 @@ function NewsDetailsPage({ news, loading }) {
         <Link to="/news" className="button secondary-button">
           ← Назад к новостям
         </Link>
+
+        <button className="button danger-button" onClick={handleDelete}>
+          Удалить новость
+        </button>
       </article>
     </main>
   );

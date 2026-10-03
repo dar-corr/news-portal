@@ -49,6 +49,10 @@ function App() {
     setNews((previousNews) => [newNews, ...previousNews]);
   }
 
+  function deleteNews(id) {
+    setNews((previousNews) => previousNews.filter((item) => item.id !== id));
+  }
+
   return (
     <>
       <Header />
@@ -70,10 +74,14 @@ function App() {
 
         <Route
           path="/news/:id"
-          element={<NewsDetailsPage news={news} loading={loading} />}
+          element={
+            <NewsDetailsPage
+              news={news}
+              loading={loading}
+              onDeleteNews={deleteNews}
+            />
+          }
         />
-
-        <Route path="/news/:id" element={<NewsDetailsPage news={news} />} />
 
         <Route path="/add-news" element={<AddNewsPage onAddNews={addNews} />} />
 
