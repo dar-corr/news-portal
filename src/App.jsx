@@ -11,10 +11,36 @@ import { initialNews } from "./data/news";
 import { getNews } from "./api/newsApi";
 
 function App() {
-  const [news, setNews] = useState(initialNews);
+
+  const [addedNews, setAddedNews] = useState(() => {
+    const saved = localStorage.getItem("addedNews");
+
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [deletedIds, setDeletedIds] = useState(() => {
+    const saved = localStorage.getItem("deletedIds");
+
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [news, setNews] = useState(() => [
+    ...addedNews,
+    ...initialNews.filter((item) => !deletedIds.includes(item.id)),
+  ]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
+  
+
+  useEffect(() => {
+    localStorage.setItem("addedNews", JSON.stringify(addedNews));
+  }, [addedNews]);
+
+  useEffect(() => {
+    localStorage.setItem("deletedIds", JSON.stringify(deletedIds));
+  }, [deletedIds]);
 
   useEffect(() => {
     let ignore = false;
@@ -27,7 +53,11 @@ function App() {
         const apiNews = await getNews();
 
         if (!ignore) {
-          setNews((previousNews) => [...previousNews, ...apiNews]);
+          const availableApiNews = apiNews.filter(
+            (item) => !deletedIds.includes(item.id),
+          );
+
+          setNews((previousNews) => [...previousNews, ...availableApiNews]);
 
           setIsLoaded(true);
         }
@@ -46,11 +76,23 @@ function App() {
   }, []);
 
   function addNews(newNews) {
+    setAddedNews((previousNews) => [newNews, ...previousNews]);
+
     setNews((previousNews) => [newNews, ...previousNews]);
   }
 
   function deleteNews(id) {
     setNews((previousNews) => previousNews.filter((item) => item.id !== id));
+
+    setAddedNews((previousNews) => previousNews.filter((item) => item.id !== id));
+
+    setDeletedIds((previousIds) => {
+      if (previousIds.includes(id)) {
+        return previousIds;
+      }
+
+      return [...previousIds, id];
+    });
   }
 
   return (
