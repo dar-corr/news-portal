@@ -6,14 +6,20 @@ import HomePage from "./pages/HomePage";
 import NewsPage from "./pages/NewsPage";
 import NewsDetailsPage from "./pages/NewsDetailsPage";
 import AddNewsPage from "./pages/AddNewsPage";
+import EditNewsPage from "./pages/EditNewsPage";
 
 import { initialNews } from "./data/news";
 import { getNews } from "./api/newsApi";
 
 function App() {
-
   const [addedNews, setAddedNews] = useState(() => {
     const saved = localStorage.getItem("addedNews");
+
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [editedNews, setEditedNews] = useState(() => {
+    const saved = localStorage.getItem("editedNews");
 
     return saved ? JSON.parse(saved) : [];
   });
@@ -26,17 +32,29 @@ function App() {
 
   const [news, setNews] = useState(() => [
     ...addedNews,
-    ...initialNews.filter((item) => !deletedIds.includes(item.id)),
+
+    ...initialNews
+      .filter((item) => !deletedIds.includes(item.id))
+      .map((item) => {
+        const edited = editedNews.find(
+          (editedItem) => editedItem.id === item.id,
+        );
+
+        return edited || item;
+      }),
   ]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
-  
 
   useEffect(() => {
     localStorage.setItem("addedNews", JSON.stringify(addedNews));
   }, [addedNews]);
+
+  useEffect(() => {
+    localStorage.setItem("editedNews", JSON.stringify(editedNews));
+  }, [editedNews]);
 
   useEffect(() => {
     localStorage.setItem("deletedIds", JSON.stringify(deletedIds));
@@ -53,9 +71,15 @@ function App() {
         const apiNews = await getNews();
 
         if (!ignore) {
-          const availableApiNews = apiNews.filter(
-            (item) => !deletedIds.includes(item.id),
-          );
+          const availableApiNews = apiNews
+            .filter((item) => !deletedIds.includes(item.id))
+            .map((item) => {
+              const edited = editedNews.find(
+                (editedItem) => editedItem.id === item.id,
+              );
+
+              return edited || item;
+            });
 
           setNews((previousNews) => [...previousNews, ...availableApiNews]);
 
@@ -81,10 +105,50 @@ function App() {
     setNews((previousNews) => [newNews, ...previousNews]);
   }
 
+  function updateNews(updatedNews) {
+    setNews((previousNews) =>
+      previousNews.map((item) =>
+        item.id === updatedNews.id ? updatedNews : item,
+      ),
+    );
+
+    const isAddedNews = addedNews.some((item) => item.id === updatedNews.id);
+
+    if (isAddedNews) {
+      setAddedNews((previousNews) =>
+        previousNews.map((item) =>
+          item.id === updatedNews.id ? updatedNews : item,
+        ),
+      );
+
+      return;
+    }
+
+    setEditedNews((previousNews) => {
+      const alreadyEdited = previousNews.some(
+        (item) => item.id === updatedNews.id,
+      );
+
+      if (alreadyEdited) {
+        return previousNews.map((item) =>
+          item.id === updatedNews.id ? updatedNews : item,
+        );
+      }
+
+      return [...previousNews, updatedNews];
+    });
+  }
+
   function deleteNews(id) {
     setNews((previousNews) => previousNews.filter((item) => item.id !== id));
 
-    setAddedNews((previousNews) => previousNews.filter((item) => item.id !== id));
+    setAddedNews((previousNews) =>
+      previousNews.filter((item) => item.id !== id),
+    );
+
+    setEditedNews((previousNews) =>
+      previousNews.filter((item) => item.id !== id),
+    );
 
     setDeletedIds((previousIds) => {
       if (previousIds.includes(id)) {
@@ -121,6 +185,17 @@ function App() {
               news={news}
               loading={loading}
               onDeleteNews={deleteNews}
+            />
+          }
+        />
+
+        <Route
+          path="/news/:id/edit"
+          element={
+            <EditNewsPage
+              news={news}
+              loading={loading}
+              onUpdateNews={updateNews}
             />
           }
         />

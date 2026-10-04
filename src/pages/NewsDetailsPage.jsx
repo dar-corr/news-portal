@@ -63,13 +63,20 @@ function NewsDetailsPage({ news, loading, onDeleteNews }) {
 
         <p className="news-full-text">{currentNews.fullText}</p>
 
-        <Link to="/news" className="button secondary-button">
-          ← Назад к новостям
-        </Link>
+        <div className="news-actions">
+          <Link to="/news" className="button secondary-button">
+            ← Назад к новостям
+          </Link>
 
-        <button className="button danger-button" onClick={handleDelete}>
-          Удалить новость
-        </button>
+          <Link to={`/news/${currentNews.id}/edit`} className="button">
+            Редактировать
+          </Link>
+
+          <button className="button danger-button" onClick={handleDelete}>
+            Удалить новость
+          </button>
+        </div>
+        
       </article>
     </main>
   );
